@@ -1,6 +1,6 @@
 Name:           python-rpm-macros
 Version:        3
-Release:        42%{?dist}
+Release:        43%{?dist}
 Summary:        The unversioned Python RPM macros
 
 License:        MIT
@@ -9,10 +9,11 @@ Source1:        macros.python-srpm
 Source2:        macros.python2
 Source3:        macros.python3
 Source4:        macros.pybytecompile
+Source5:        https://github.com/frenzymadness/compileall2/raw/v0.3.0/compileall2.py
 
 BuildArch:      noarch
-# For %%python3_pkgversion used in %%python_provide
-Requires:       python-srpm-macros
+# For %%python3_pkgversion used in %%python_provide and compileall2.py
+Requires:       python-srpm-macros >= 3-43
 Obsoletes:      python-macros < 3
 Provides:       python-macros = %{version}-%{release}
 
@@ -25,6 +26,7 @@ python?-devel packages require it. So install a python-devel package instead.
 
 %package -n python-srpm-macros
 Summary:        RPM macros for building Python source packages
+Requires:       redhat-rpm-config
 
 %description -n python-srpm-macros
 RPM macros for building Python source packages.
@@ -41,8 +43,6 @@ RPM macros for building Python 2 packages.
 %package -n python3-rpm-macros
 Summary:        RPM macros for building Python 3 packages
 Requires:       python-srpm-macros >= 3-38
-# Would need to be different for each release - worth it?
-#Conflicts:      python3-devel < 3.5.1-3
 
 %description -n python3-rpm-macros
 RPM macros for building Python 3 packages.
@@ -53,9 +53,13 @@ RPM macros for building Python 3 packages.
 %build
 
 %install
-mkdir -p %{buildroot}/%{rpmmacrodir}
+mkdir -p %{buildroot}%{rpmmacrodir}
 install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} \
-  %{buildroot}/%{rpmmacrodir}/
+  %{buildroot}%{rpmmacrodir}/
+
+mkdir -p %{buildroot}%{_rpmconfigdir}/redhat
+install -m 644 %{SOURCE5} \
+  %{buildroot}%{_rpmconfigdir}/redhat/
 
 
 %files
@@ -64,6 +68,7 @@ install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} \
 
 %files -n python-srpm-macros
 %{rpmmacrodir}/macros.python-srpm
+%{_rpmconfigdir}/redhat/compileall2.py
 
 %files -n python2-rpm-macros
 %{rpmmacrodir}/macros.python2
@@ -73,6 +78,9 @@ install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} \
 
 
 %changelog
+* Wed Apr 17 2019 Miro Hrončok <mhroncok@redhat.com> - 3-43
+- Use compileall2 on Python 3
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 3-42
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
